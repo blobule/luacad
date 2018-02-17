@@ -1,0 +1,13 @@
+<h1>cube</h1>
+cube{size=matrix{1,1,1},center=false}
+
+size : size of the cube ( use matrix{1,2,3} or matrix{{1},{2},{3}} )
+center : to center the cube or not
+
+TODO: size=matrix{1,2,3} does not work
+
+
+
+
+
+

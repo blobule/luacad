@@ -1,0 +1,11 @@
+<h1>polyhedron</h1>
+
+polyhedron{points={x1,y1,z1,x2,y2,z2,...}, faces={i1,j1,k1,i2,j2,k2,...}, convexity=1}
+
+points : flat list of x,y,z points
+faces : flat list of indices in the list of points, starting at 1, ending at number of points
+convexity: for opencsg display purposes. Maximum number of crossings of the border from inside to outside (convex object = 1)
+
+
+
+

@@ -1,0 +1,92 @@
+
+--
+-- lua cad
+--
+-- simpler version...
+--
+-- une geomtrie est une table avec les parametres reserves suivant:
+--
+-- _operator : nom de l'operateur
+-- _keys : liste des cles standard acceptés pour cet opérateur (sert à la validation seulement)
+-- _render : fonction qui sera appellée au moment du rendu final (recursif)
+-- _computehash : retourne le hash unique de cet operateur (recursif)
+-- _dump : affichage (recursif)
+-- _infx : affichage (recursif)
+-- si _keys contient {"x","y",z"} , alors on a aussi les parametres x,y,z
+-- les elements sans clé sont les enfants, donc # donne le nombre, et [1],[2], ... accède
+--
+-- les tables ont une metatable "geometry" et sont read-only
+-- (on ne peut pas changer/ajouter un parametre apres la creation)
+--
+
+function readonlytable(table)
+    return setmetatable({}, {
+        __index = table,
+        __newindex =    function(table, key, value) print("Attempt to modify read-only table") end,
+        __metatable = "geometry",
+        __len = function() return #table end,
+        __tostring = function() return tostring(table) end,
+        __pairs = function() return pairs(table) end
+--        __add = function(a,b) return combine(union(),a,b) end,
+--        __mul = function(a,b) return combine(intersection(),a,b) end,
+--        __sub = function(a,b) return combine(difference(),a,b) end
+    });
+end
+
+function indent(level)
+    for i=1,(level or 0) do io.write("  ") end
+end
+
+
+function dump(t,level)
+	level = level or 0
+	-- les elements [1],[2], ...
+    indent(level) print(t._operator)
+    level=level+1
+	for k,v in pairs(t) do
+		if type(k)~="number" then indent(level) print("key",k,"value",v) end
+	end
+	for k,v in ipairs(t) do
+		dump(v,level)
+	end
+end
+
+
+function operator(name,args)
+	local self=args
+	self._operator=name
+    return readonlytable(self)
+end
+
+function union(args)        return operator("union",args) end
+function intersection(args) return operator("intersection",args) end
+function difference(args)   return operator("difference",args) end
+
+a=operator("sphere",{r=4.5})
+b=operator("cube",{x=1,y=1,z=1})
+c=operator("union",{toto=456,a,b})
+
+function dup(args)
+    -- duplicate with translation
+    return
+    operator("intersection",{
+        operator("translation",{x=1,args[1]}),
+        operator("translation",{x=-1,table.unpack(args)}),
+        ref={1,2,3}
+    })
+end
+
+d=dup{c,a,b}
+
+--e=operator("union",{a,d})
+e=  difference{
+        union{blub=12,a,b},
+        b
+    }
+
+dump(e)
+
+print("---------------")
+
+
+

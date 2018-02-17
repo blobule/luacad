@@ -1,0 +1,15 @@
+<h1>cone</h1>
+
+cone{[r=1|d],[h=1],[n=16],[triangles=0]}
+
+r = lower radius
+d = lower diameter
+h = heigth
+n = number of vertices in a full circle
+triangles : 0 or 1
+center : see cylinder
+
+
+
+
+

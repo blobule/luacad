@@ -1,0 +1,6 @@
+<h1>hull</h1>
+returns smallest convex polyhedron that contains nef
+
+hull{nef}
+
+

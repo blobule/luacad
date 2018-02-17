@@ -1,0 +1,5 @@
+<h1>import</h1>
+Import{name="test.stl"}
+
+name : stl file to import
+

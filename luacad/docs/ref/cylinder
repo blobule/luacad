@@ -1,0 +1,21 @@
+<h1>cylinder</h1>
+
+cylinder{[r=1|d],[h=1],[n=16],[triangles=0]}
+cylinder{[r1=1|d1],[r2=1|d1],[h=1],[n=16],[triangles=0]}
+
+h : height
+r : radius
+d : diameter
+r1 : upper radius
+r2 : lower radius
+d1 : upper diameter
+d2 : lower diameter
+n : number of vertices in a full circle
+triangles : 0 or 1
+center : if centered vertically or not
+
+
+
+
+
+

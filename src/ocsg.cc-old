@@ -1,0 +1,399 @@
+
+//
+// support opencsg
+// with nef understanding
+//
+//
+
+
+#include <ocsg.h>
+
+
+#include "linmath.h"
+#include <stdlib.h>
+#include <stdio.h>
+#include <iostream>
+
+static void key_callback(GLFWwindow* window, int key, int scancode, int action, int mods)
+{
+    if (key == GLFW_KEY_ESCAPE && action == GLFW_PRESS)
+            glfwSetWindowShouldClose(window, 1);
+}
+
+
+static void error_callback(int error, const char* description)
+{
+        fprintf(stderr, "Error: %s\n", description);
+}
+
+
+/*
+static const struct
+{
+        float x, y;
+        float r, g, b;
+} vertices[3] =
+{
+        { -0.6f, -0.4f, 1.f, 0.f, 0.f },
+            {  0.6f, -0.4f, 0.f, 1.f, 0.f },
+                {   0.f,  0.6f, 0.f, 0.f, 1.f }
+};
+
+static const char* vertex_shader_text =
+"uniform mat4 MVP;\n"
+"attribute vec3 vCol;\n"
+"attribute vec2 vPos;\n"
+"varying vec3 color;\n"
+"void main()\n"
+"{\n"
+"    gl_Position = MVP * vec4(vPos, 0.0, 1.0);\n"
+"    color = vCol;\n"
+"}\n";
+
+static const char* fragment_shader_text =
+"varying vec3 color;\n"
+"void main()\n"
+"{\n"
+"    gl_FragColor = vec4(color, 1.0);\n"
+"}\n";
+*/
+
+
+static const char* vertex_shader_text =
+"#version 330"
+"layout(location = 0) in vec4 position;"
+"void main()"
+"{"
+"  gl_Position = position;"
+"}";
+
+static const char* fragment_shader_text =
+"#version 330"
+"out vec4 outputColor;"
+"void main()"
+"{"
+"  outputColor = vec4(1.0f, 1.0f, 1.0f, 1.0f);"
+"}";
+
+
+
+///////////////////////////////////////////////////////////////
+
+
+int ocsg::init(void)
+{
+    std::cout << "init\n";
+
+
+    glfwSetErrorCallback(error_callback);
+    if (!glfwInit()) return(-1);
+
+
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MAJOR, 2);
+    glfwWindowHint(GLFW_CONTEXT_VERSION_MINOR, 0);
+    window = glfwCreateWindow(640, 480, "Simple example", NULL, NULL);
+    if (!window) {
+        glfwTerminate();
+        return(-1);
+    }
+
+    glfwSetKeyCallback(window, key_callback);
+    glfwMakeContextCurrent(window);
+
+    // MUST be called after MakeContextCurrent
+    glewExperimental=GL_TRUE;
+    if( glewInit()!=GLEW_OK ) {
+         printf("No glew!\n");
+         return(-1);
+    }
+    glfwSwapInterval(1);
+
+    int OpenGLVersion[2];
+    glGetIntegerv(GL_MAJOR_VERSION, &OpenGLVersion[0]);
+    glGetIntegerv(GL_MINOR_VERSION, &OpenGLVersion[1]);
+    printf("OpenGL major version = %d\n",OpenGLVersion[0]);
+    printf("OpenGL minor version = %d\n",OpenGLVersion[1]);
+
+
+    glClearColor(0.5f, 0.5f, 0.5f, 1.0f);
+
+    // Enable two OpenGL lights
+    GLfloat light_diffuse[]   = { 1.0f,  0.5f,  0.5f,  1.0f};  // Red diffuse light
+    GLfloat light_position0[] = {-1.0f, -1.0f, -1.0f,  0.0f};  // Infinite light location
+    GLfloat light_position1[] = { 1.0f,  1.0f,  1.0f,  0.0f};  // Infinite light location
+
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position0);
+    glEnable(GL_LIGHT0);
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, light_diffuse);
+    glLightfv(GL_LIGHT1, GL_POSITION, light_position1);
+    glEnable(GL_LIGHT1);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_NORMALIZE);
+
+
+    // Use depth buffering for hidden surface elimination
+    glEnable(GL_DEPTH_TEST);
+
+    // Setup the view of the CSG shape
+    glMatrixMode(GL_PROJECTION);
+    gluPerspective(40.0, 1.0, 1.0, 10.0);
+    glMatrixMode(GL_MODELVIEW);
+
+
+
+
+    return 0;
+}
+
+void ocsg::uninit(void)
+{
+    if( window!=NULL) glfwDestroyWindow(window);
+    window=NULL;
+    glfwTerminate();
+}
+
+void ocsg::clear(void)
+{
+    std::cout << "clear\n";
+
+
+    for (std::vector<OpenCSG::Primitive*>::const_iterator i = primitives.begin(); i != primitives.end(); ++i) {
+        OpenCSG::DisplayListPrimitive* p = static_cast<OpenCSG::DisplayListPrimitive*>(*i);
+        glDeleteLists(1, p->getDisplayListId());
+        delete p;
+    }
+
+    vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertex_shader, 1, &vertex_shader_text, NULL);
+    glCompileShader(vertex_shader);
+
+    fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragment_shader, 1, &fragment_shader_text, NULL);
+    glCompileShader(fragment_shader);
+
+    program = glCreateProgram();
+    glAttachShader(program, vertex_shader);
+    glAttachShader(program, fragment_shader);
+    glLinkProgram(program);
+
+    std::cout << "program is " <<program<<"\n";
+
+    /*
+    glGenBuffers(1, &vertex_buffer);
+    glBindBuffer(GL_ARRAY_BUFFER, vertex_buffer);
+    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
+
+
+    vertex_shader = glCreateShader(GL_VERTEX_SHADER);
+    glShaderSource(vertex_shader, 1, &vertex_shader_text, NULL);
+    glCompileShader(vertex_shader);
+
+    fragment_shader = glCreateShader(GL_FRAGMENT_SHADER);
+    glShaderSource(fragment_shader, 1, &fragment_shader_text, NULL);
+    glCompileShader(fragment_shader);
+
+    program = glCreateProgram();
+    glAttachShader(program, vertex_shader);
+    glAttachShader(program, fragment_shader);
+    glLinkProgram(program);
+
+    mvp_location = glGetUniformLocation(program, "MVP");
+    vpos_location = glGetAttribLocation(program, "vPos");
+    vcol_location = glGetAttribLocation(program, "vCol");
+    glEnableVertexAttribArray(vpos_location);
+    glVertexAttribPointer(vpos_location, 2, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*) 0);
+    glEnableVertexAttribArray(vcol_location);
+    glVertexAttribPointer(vcol_location, 3, GL_FLOAT, GL_FALSE, sizeof(float) * 5, (void*) (sizeof(float) * 2));
+      */
+
+
+}
+
+
+
+
+static int drawBlub() {
+
+    GLfloat vertices[] = {    
+        1.0f, 0.0f, -1.0f,    //0 index
+        1.0f, 0.0f, 1.0f,   //1
+        -1.0f,0.0f, 1.0f,   //2
+        -1.0f, 0.0f,-1.0f,  //3
+        1.0f, 1.0f, -1.0f,  //4
+        1.0f, 1.0f, 1.0f,   //5
+        -1.0f,1.0f, 1.0f,   //6  
+        -1.0f, 1.0f, -1.0f,      //7
+    };
+
+    int indices[] = { 0,1,2, 0,2,3,
+
+        4,5,1, 4,1,0,
+        7,4,3, 4,0,3,
+        6,7,3, 6,3,2,
+        5,6,2,  5,2,1,
+
+        7,6,5, 7,5,4
+    };
+
+
+    GLuint id1 = glGenLists(1);
+    glNewList(id1, GL_COMPILE);
+
+    // activate and specify pointer to vertex array
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, 0, vertices);
+    // draw a cube
+    glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, indices);
+    // deactivate vertex arrays after drawing
+    //glDisableClientState(GL_VERTEX_ARRAY);
+    
+    glEndList();
+
+    return id1;
+
+
+}
+
+
+
+
+
+int ocsg::draw(char op,float *vertices,int *facets,int nbV,int nbF)
+{
+    std::cout << "draw op="<<op<<"\n";
+
+    glfwMakeContextCurrent(window);
+    //int id=drawBlub();
+    
+    GLuint id = glGenLists(1);
+    glNewList(id, GL_COMPILE);
+
+    // activate and specify pointer to vertex array
+    glEnableClientState(GL_VERTEX_ARRAY);
+    glVertexPointer(3, GL_FLOAT, 0, vertices);
+    glDrawElements(GL_TRIANGLES, nbF*3, GL_UNSIGNED_INT, facets);
+    //glDisableClientState(GL_VERTEX_ARRAY);
+
+    float *normals;
+    normals=(float *)malloc(nbV*3*sizeof(float));
+    for(int i=0;i<nbV;i++) {
+        normals[i*3+0]=(random()%1000-500.0)/500.0;
+        normals[i*3+1]=(random()%1000-500.0)/500.0;
+        normals[i*3+2]=(random()%1000-500.0)/500.0;
+    }
+
+    glEnableClientState(GL_NORMAL_ARRAY);
+    glNormalPointer(GL_FLOAT,0,normals);
+    //glDisableClientState(GL_NORMAL_ARRAY);
+
+    glEndList();
+
+    free(normals);
+
+    OpenCSG::Operation oper;
+    if( op=='*' ) oper=OpenCSG::Intersection;
+    else if( op=='-' ) oper=OpenCSG::Subtraction;
+    else oper=OpenCSG::Intersection;
+
+    primitives.push_back(new OpenCSG::DisplayListPrimitive(id, oper, 2)); // , convexity
+
+    /*
+    {
+        float ratio;
+        int width, height;
+        mat4x4 m, p, mvp;
+        glfwGetFramebufferSize(window, &width, &height);
+        ratio = width / (float) height;
+        glViewport(0, 0, width, height);
+        glClear(GL_COLOR_BUFFER_BIT);
+        mat4x4_identity(m);
+        mat4x4_rotate_Z(m, m, (float) glfwGetTime());
+        mat4x4_ortho(p, -ratio, ratio, -1.f, 1.f, 1.f, -1.f);
+        mat4x4_mul(mvp, p, m);
+        glUseProgram(program);
+        glUniformMatrix4fv(mvp_location, 1, GL_FALSE, (const GLfloat*) mvp);
+        glDrawArrays(GL_TRIANGLES, 0, 3);
+        glfwSwapBuffers(window);
+        glfwPollEvents();
+    }
+    */
+
+    return 0;
+}
+
+float rot=0.0f;
+
+int ocsg::render(void)
+{
+    glfwMakeContextCurrent(window);
+    //std::cout << "render\n";
+    if( glfwWindowShouldClose(window) ) return(1); // done!
+
+        float ratio;
+        int width, height;
+        mat4x4 m, p, mvp;
+        glfwGetFramebufferSize(window, &width, &height);
+        ratio = width / (float) height;
+        glViewport(0, 0, width, height);
+        //printf("viewport is (%d,%d)\n",width,height);
+
+        /*
+        glMatrixMode(GL_PROJECTION);
+        glLoadIdentity();
+        glOrtho(-2.0, 2.0, 2.0, -2.0, 0.0, 1000.0);
+        */
+
+        glMatrixMode(GL_MODELVIEW);
+        glLoadIdentity();
+
+    glMatrixMode(GL_MODELVIEW);
+    glLoadIdentity();
+    gluLookAt(0.0, 2.0, 5.0,  /* eye is at (0,2,5) */
+              0.0, 0.0, 0.0,  /* center is at (0,0,0) */
+              0.0, 1.0, 0.0); /* up is in positive Y direction */
+    glRotatef(rot, 0.0f, 1.0f, 0.0f);
+    rot+=0.5;
+    //
+    //glDisable(GL_DEPTH_TEST);
+    //glEnable(GL_BLEND);
+    //glClearColor( 0.0, 1.0, 0.0, 1.0 );
+    
+
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT | GL_STENCIL_BUFFER_BIT);
+    OpenCSG::render(primitives);
+    //printf("render %d primitives\n",(int)primitives.size());
+
+    glDepthFunc(GL_EQUAL);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_COLOR_MATERIAL);
+    glColorMaterial(GL_FRONT,GL_AMBIENT_AND_DIFFUSE);
+    //glBlendFunc(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA);
+    //glEnable( GL_BLEND );
+    //
+    //glDisable(GL_CULL_FACE);
+    glShadeModel(GL_SMOOTH);
+    //glFrontFace(GL_CCW);
+    //glEnable(GL_CULL_FACE);
+    //glEnable(GL_DEPTH_TEST);
+    glEnable(GL_NORMALIZE);
+    glEnable(GL_AUTO_NORMAL);
+
+    //glUseProgram(program);
+
+    for (std::vector<OpenCSG::Primitive*>::const_iterator i = primitives.begin(); i != primitives.end(); ++i) {
+        glColor4f(1.0f, 1.0f, 0.0f,1.0f);
+        (*i)->render();
+    }
+
+    glfwSwapBuffers(window);
+    glfwPollEvents();
+
+    return(0);
+}
+
+
+
+
+
+

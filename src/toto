@@ -1,0 +1,27 @@
+
+// gray background
+    glClearColor(0.9f, 0.9f, 0.9f, 1.0f);
+
+    // Enable two OpenGL lights
+    GLfloat light_diffuse[]   = { 1.0f,  0.5f,  0.5f,  1.0f};  // Red diffuse light
+    GLfloat light_position0[] = {-1.0f, -1.0f, -1.0f,  0.0f};  // Infinite light location
+    GLfloat light_position1[] = { 1.0f,  1.0f,  1.0f,  0.0f};  // Infinite light location
+
+    glLightfv(GL_LIGHT0, GL_DIFFUSE, light_diffuse);
+    glLightfv(GL_LIGHT0, GL_POSITION, light_position0);
+    glEnable(GL_LIGHT0);
+    glLightfv(GL_LIGHT1, GL_DIFFUSE, light_diffuse);
+    glLightfv(GL_LIGHT1, GL_POSITION, light_position1);
+    glEnable(GL_LIGHT1);
+    glEnable(GL_LIGHTING);
+    glEnable(GL_NORMALIZE);
+
+    // Use depth buffering for hidden surface elimination
+    glEnable(GL_DEPTH_TEST);
+
+    // Setup the view of the CSG shape
+    glMatrixMode(GL_PROJECTION);
+    gluPerspective(40.0, 1.0, 1.0, 10.0);
+    glMatrixMode(GL_MODELVIEW);
+
+

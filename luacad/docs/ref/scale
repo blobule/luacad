@@ -1,0 +1,9 @@
+<h1>scale</h1>
+
+scale{[x=0|s],[y=0|s],[z=0|s],nef}
+
+s : scale factor
+x,y,z : x,y,z scale factors
+
+
+

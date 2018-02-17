@@ -1,0 +1,15 @@
+<h1>sphere</h1>
+
+sphere{[r=1],[n=8],[triangles=0]}
+
+r : radius
+n : number of divisions (total points are approx n x n)
+triangles : 0/1 to use triangles or quads for each face
+
+
+
+
+
+
+
+

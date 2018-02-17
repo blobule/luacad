@@ -1,0 +1,9 @@
+<h1>rotate</h1>
+
+rotate{[x=0],[y=0],[z=0],nef}
+
+x,y,z : degrees to rotate around x,y,z axis
+
+
+
+

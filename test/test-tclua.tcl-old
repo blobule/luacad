@@ -1,0 +1,100 @@
+
+
+package require tclua
+
+set r [lua {return 1,2,3,4,"allo",nil,5.5,-4.6,true,false,blub}]
+#puts "res is $r"
+#puts "length is [llength $r]"
+
+#lassign [lua {return 456*93,888}] a b
+#puts "$a and $b"
+
+#puts [lua a=123]
+#puts [lua bonjour]
+#puts [lua return 'allo']
+#puts [lua {return 1,true,false}]
+#lua {return nil,555}
+#lua {return 1,2,4.5}
+#lua {return {4,5,6}}
+#lua {return function() end}
+#lua {n='allo';return n}
+
+set wid [lua {return dofile("csg.lua")}]
+
+puts "tcl got wid $wid"
+
+
+toplevel .e -use $wid -padx 10 -pady 10 -takefocus 1
+.e config -background "#606060"
+
+
+proc setupEditeur {} {
+
+    text .t -yscrollcommand ".scroll set" -setgrid true -width 40 -height 10 -wrap word
+    scrollbar .scroll -command ".t yview"
+    pack .scroll -side right -fill y
+    pack .t -expand yes -fill both -padx 20 -pady 20
+
+    # Set up the tags 
+    .t tag configure bold_italics -font {-family courier -size 12 -weight bold -slant italic}
+    .t tag configure big -font {-family helvetica -size 24 -weight bold}
+    .t tag configure color1 -foreground red
+    .t tag configure sunken -relief sunken -borderwidth 1
+    .t tag bind Ouch <1> {.e.t insert end "Ouch! "}
+
+    # Now insert text that has the property of the tags
+    .t insert end "Here are a few text styles.\n"
+    .t insert end "1. Bold italic text.\n" bold_italics
+    .t insert end "2. Larger Helvetica  text.\n" big
+    .t insert end "3. Red text.\n" color1
+    .t insert end "4. Sunken text.\n" sunken
+    button .b -text "5. An embedded Hello Button" -command {.t insert end "Hello "}
+    #.t window create end -window .b
+    .t insert end "\n"
+    .t insert end "6. Text with a binding (try clicking me)" Ouch
+    .t insert end "\nAnd all this is editable!"
+
+    scale .scale -orient horizontal -length 50 -from 0 -to 100 -command "puts" 
+    .t insert end "\ntranslate{x="
+    #.t window create end -window .scale
+    .t insert end ",y=10,z=0}{...}"
+}
+
+
+proc setupMenu {} {
+    menu .m
+    . configure -menu .m
+    menu .m.a -tearoff 0
+    .m.a add command -label open  
+    .m add cascade -menu .m.a -label file
+}
+
+
+setupEditeur
+setupMenu
+
+
+proc setupOverlay {w} {
+    button .e.b1 -text "Bonjour" -command {puts Bonjour}
+    button .e.quit -text "Quit!" -command {destroy .}
+    pack .e.b1 -ipadx 15 -pady 5
+    pack .e.quit
+}
+
+
+setupOverlay .e
+
+set n 0
+
+proc refresh {} {
+    global n
+    lua coroutine.resume(renderer,$n)
+    after idle [list after 0 refresh]
+    incr n
+}
+
+
+refresh
+
+
+
