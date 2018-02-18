@@ -531,7 +531,7 @@ end
 --
 
 -- assume mode est "preview" ou "render"
-function render(s)
+function display(s)
     if mode=="preview" then
         print("***** PREVIEW *****")
         displayProducts=renderize(s,false)
@@ -539,6 +539,12 @@ function render(s)
         print("***** RENDER *****")
         displayProducts=renderize(s,true)
     end
+end
+
+-- pour simplifier: un call a render(s) va faire le rendu complet et deposer dans la cache
+function render(s)
+    local display=renderize(s,true)
+    if #display ~= 1 then error("cant get rendering") end
 end
 
 function renderize(s,fullrender)
@@ -562,7 +568,6 @@ function renderize(s,fullrender)
     for i,v in ipairs(displaylist) do
         displaylist[i].nef=cache.lookup(v.hash)
     end
-
 
     print("---- display list (len="..#displaylist..") ----")
     for i,v in ipairs(displaylist) do print(i.." : "..v.op.." "..v.hash,v.nef) end

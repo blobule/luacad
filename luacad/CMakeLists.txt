@@ -1,7 +1,7 @@
 
 cmake_minimum_required (VERSION 3.0)
 
-project (luacadx)
+project (luacad)
 
 find_package(Lua 5.3 REQUIRED)
 
