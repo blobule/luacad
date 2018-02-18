@@ -4,17 +4,27 @@
 
 package provide dohelp 1.0
 
-### Attention, utilise la variable globale docsDirectory
+### Attention
+###    utilise la variable globale docsDirectory
+###    si un fichier n'existe pas dans docsDirectory, on cherche dans refDocsDirectory
+###
 
 proc helpSetDoc {class name} {
-    global docsDirectory
+    global docsDirectory refDocsDirectory
 	set fname "$docsDirectory/$class/$name"
 	if { [file exists $fname] } {
 		set f [open $fname r]
 		set txt [read $f]
 		close $f
 	} else {
-		set txt "<h1>$name</h1>\nImpossible de trouver le fichier <code>$fname</code>\n"
+	    set fnameR "$refDocsDirectory/$class/$name"
+	    if { [file exists $fnameR] } {
+            set f [open $fnameR r]
+            set txt [read $f]
+            close $f
+        } else {
+            set txt "<h1>$name</h1>\nImpossible de trouver le fichier <code>$fname</code>\n"
+        }
 	}
 
     set tags {}
@@ -25,6 +35,8 @@ proc helpSetDoc {class name} {
 }
 
 proc helpSaveDoc {txt fname} {
+    # create directories, in case they dont exists
+    file mkdir [file dirname $fname]
     set f [open $fname w]
     if { [catch {open $fname w}] } {
         puts "error opening file $fname for writing"
@@ -163,6 +175,7 @@ pack .help.scroll -side right -fill y
 pack .help.t -expand yes -fill both
 pack .help -expand yes -fill x
 
+
 #button .b -text "save" -command saveit
 #pack .b
 
@@ -176,11 +189,19 @@ bind .help.t <F1> { documentation }
 
 set h .help.t
 
-set fp [open "$docsDirectory/guide/intro" r]
-set txt [read $fp]
-close $fp
+set txt ""
+if { [file exits $docsDirectory/guide/intro] } {
+    set fp [open "$docsDirectory/guide/intro" r]
+    set txt [read $fp]
+    close $fp
+} else {
+    if { [file exits $refDocsDirectory/guide/intro] } {
+        set txt [read $fp]
+        close $fp
+    }
+}
 
-puts $txt
+$h insert 1.0 $txt
 
 $h tag configure highlightline -background yellow -font "helvetica 14 bold" -relief raised
 $h tag configure h1 -font "helvetica 18 bold" -relief raised
@@ -192,7 +213,7 @@ proc check {v} {
     upvar $name x
 }
 
-$h insert 1.0 $txt
+
 
 set tags {}
 while { [extractTags txt tags] } { puts "YOYOYO" }

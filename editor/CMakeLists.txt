@@ -21,6 +21,6 @@ install(FILES editor-csg.lua DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/lua/5.3)
 install(PROGRAMS dohelp.tcl DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/tcltk/dohelp)
 install(FILES dohelp-pkgIndex.tcl RENAME pkgIndex.tcl DESTINATION ${CMAKE_INSTALL_PREFIX}/lib/tcltk/dohelp)
 
-install(DIRECTORY docs DESTINATION /usr/local/share/luacad)
+install(DIRECTORY docs DESTINATION /usr/local/share/luacad USE_SOURCE_PERMISSIONS)
 
 

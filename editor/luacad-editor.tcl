@@ -25,7 +25,8 @@ package require dohelp
 #
 # config globale pour la documentation
 #
-set docsDirectory /usr/local/share/luacad/docs
+set docsDirectory ~/.luacad/docs
+set refDocsDirectory /usr/local/share/luacad/docs
 
 
 #
@@ -203,6 +204,19 @@ proc setupEditeur {} {
 set fileName {}
 wm title . $fileName
 
+# open fname1 , or fname2 if fname1 does not exists
+# the used name in the end is always fname1
+proc openFileAlternate {fname1 fname2} {
+    if { [file exists $fname1] } {
+        openFile $fname1
+    } else {
+        openFile $fname2
+        # reset to firstname
+        global fileName
+        set fileName $fname1
+        wm title . $fileName
+    }
+}
 
 proc openFile {fname} {
     global fileName
@@ -253,13 +267,15 @@ proc menuNew {} {
 
 proc menuSave {} {
     global fileName
-    puts "save!"
+    puts "save! $fileName"
     if { ![.t edit modified] } {
         puts "save : nothing to save"
     } else {
         if { $fileName == {} } {
             menuSaveAs
         } else {
+            # create directory, in cas we save to local help files
+            file mkdir [file dirname $fileName]
             if { [catch {set f [open $fileName w]}] } {
                 tk_messageBox -message "Unable to open file\n$fileName" -icon error -type ok -detail "for writing"
                 return
@@ -315,12 +331,16 @@ proc menuExit {} {
 proc setupMenu {} {
     menu .m
     . configure -menu .m
-    global docsDirectory
+    global docsDirectory refDocsDirectory
 
     # docs/examples/<<chapter>>/<<examples>>
     # convention:  [chapitre]-[num]-[description].lua
     # pas de '-' sauf la.
-    set exs [glob -tails -directory $docsDirectory/examples *.lua]
+    set exs1 {}
+    set exs2 {}
+    catch {set exs1 [glob -tails -directory $docsDirectory/examples *.lua]}
+    catch {set exs2 [glob -tails -directory $refDocsDirectory/examples *.lua]}
+    set exs [lsort -unique [concat $exs1 $exs2]]
 
 
     menu .m.examples -tearoff 0
@@ -339,7 +359,7 @@ proc setupMenu {} {
         menu .m.examples.e$i -tearoff 0
         foreach ndf [lsort -real -index 0 $v] {
             lassign $ndf num desc fname
-            .m.examples.e$i add command -label "$num [string totitle $desc]" -command [list menuOpen "$docsDirectory/examples/$fname"]
+            .m.examples.e$i add command -label "$num [string totitle $desc]" -command [list openFileAlternate "$docsDirectory/examples/$fname" "$refDocsDirectory/examples/$fname"]
         }
         .m.examples add cascade -menu .m.examples.e$i -label [string totitle $k]
         incr i

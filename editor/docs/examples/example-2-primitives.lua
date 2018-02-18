@@ -13,6 +13,8 @@
 --	...
 --
 
+require("luacad")
+
 a=sphere{r=1,n=64,triangles=1}
 
 
@@ -40,7 +42,7 @@ e=import{name="docs/data/triceratops.stl"}
 render(coneT)
 
 
---export(coneT,"uncone.stl")
+--export{name="uncone.stl",coneT}
 
 
 
