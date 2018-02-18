@@ -18,27 +18,6 @@ message(STATUS "lua ${LUA_INCLUDE_DIR} : ${LUA_LIBRARY} : ${LUA_MATH_LIBRARY}")
 
 #########################
 
-add_library(hello SHARED hello.c)
-target_include_directories (hello PUBLIC
-    ${TCL_INCLUDE_PATH}
-    ${TK_INCLUDE_PATH}
-    ${LUA_INCLUDE_DIR}
-    )
-target_link_libraries (hello
-    ${TCL_LIBRARY}
-    ${TK_LIBRARY}
-    ${LUA_LIBRARY} ${LUA_MATH_LIBRARY}
-    )
-
-install(DIRECTORY "hello" DESTINATION "/usr/local/lib/tcltk/" DIRECTORY_PERMISSIONS
-    OWNER_WRITE OWNER_READ OWNER_EXECUTE
-    GROUP_READ GROUP_EXECUTE
-    WORLD_READ WORLD_EXECUTE)
-
-install(TARGETS hello LIBRARY DESTINATION /usr/local/lib/tcltk/hello)
-
-############################
-
 add_library(tclua SHARED tclua.c)
 target_include_directories (tclua PUBLIC
     ${TCL_INCLUDE_PATH}
