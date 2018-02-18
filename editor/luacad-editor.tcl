@@ -25,7 +25,7 @@ package require dohelp
 #
 # config globale pour la documentation
 #
-set docsDirectory ~/git/luacad/luacad/docs
+set docsDirectory /usr/local/share/luacad/docs
 
 
 #

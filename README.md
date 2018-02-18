@@ -2,9 +2,11 @@
 
 ## Description
 
-* lua based cad language and editor
+* lua based cad language
+* tcl interactive editor
 * relies on cgal for accurate rendering
-* relies on opencsg
+* relies on opencsg for fast preview
+* similar concept as OpenSCAD
 
 ## Installing
 

@@ -13,6 +13,7 @@ mtx = matrix {1,2,3}
 assert( tostring(mtx) == "{{1},{2},{3}}" )
 -- matrix with size 2x2
 mtx = matrix (2,2)
+print( tostring(mts) )
 assert( tostring(mtx) == "0\t0\n0\t0" )
 -- matrix with size 2x2 and default value 1/3
 mtx = matrix (2,2,1/3)
