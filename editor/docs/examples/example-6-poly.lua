@@ -25,8 +25,12 @@ for i=1,#p.faces,3 do print(j,p.faces[i],p.faces[i+1],p.faces[i+2]) j=j+1 end
 
 b=polyhedron{points=p.points,faces=p.faces}
 
+fin=b-sphere{r=1.05,n=64,triangles=1}
 
-render(b-sphere{r=1.05,n=32,triangles=1})
+
+display(fin)
+
+
 
 
 

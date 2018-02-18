@@ -52,10 +52,12 @@ function documente(f,params,d)
 	})
 end
 
-dup=documente(dup,{x=1},"ceci est dup")
-a=dup{sep=3,sphere{}}
+dup=documente(dup,{sep=1},"ceci est dup")
+a=dup{sep=2,sphere{}}
 print("doc",dup)
-render(a)
+display(a)
+
+
 
 
 

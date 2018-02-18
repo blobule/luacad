@@ -13,18 +13,20 @@
 
 
 a=difference{
-	sphere{},
+	sphere{n=16},
 	cube{}
 }
 
 -- same as above
-b= sphere{} - cube{}
+b= sphere{n=32} - cube{}
 
 
--- a=loop{op=union{},from=1,to=10,f=function (i) return rotate{z=i*10}{translate{x=6}{sphere{2}}} end}
+--a=loop{op=union{},from=1,to=10,f=function (i) return rotate{z=i*10}{translate{x=6}{sphere{2}}} end}
 
 
-render(b)
+display(b)
+
+
 
 
 

@@ -23,8 +23,10 @@ e=d+cube{size=matrix{2,2,2}}
 
 f=resize{x=2,y=3,z1=3,z2=4.5, e}
 
-render(f)
---render(hull{e})
+display(f)
+--display(hull{e})
+
+
 
 
 
