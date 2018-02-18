@@ -6,8 +6,8 @@ project (luacad)
 
 add_subdirectory(lualibs)
 add_subdirectory(tcllibs)
-#add_subdirectory(luacad)
-#add_subdirectory(editor)
+add_subdirectory(luacad)
+add_subdirectory(editor)
 
 
 

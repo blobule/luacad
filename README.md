@@ -18,9 +18,9 @@ sudo apt-get install libcgal-dev libcgal-qt5-dev libeigen3-dev libglfw3-dev libg
 
 sudo apt-get install tcl8.6-dev tk8.6-dev
 
-cd luacad/src;mkdir build;cd build;cmake ..;make && sudo make install
+pour compiler:
 
-cd tclua;mkdir build;cd build;cmake ..;make && sudo make install
+mkdir build;cd build;cmake ..;make && sudo make install
 
 ...
 
