@@ -1,4 +1,6 @@
 
+--local args=...
+--print(args.a,#args,args[1])
 
 a=sphere{r=1,n=64,triangles=1}
 
@@ -22,8 +24,9 @@ e=import{name="/usr/local/share/luacad/docs/data/triceratops.stl"}
 
 display(e+coneT)
 
---export{name="uncone.stl",coneT}
+--export{name="out.stl",e+coneT}
 
+--return coneT
 
 
 

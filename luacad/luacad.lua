@@ -532,6 +532,8 @@ end
 
 -- assume mode est "preview" ou "render"
 function display(s)
+    -- mode is only defined in the editor, so in command line mode display is skipped
+    if not mode then return end
     if mode=="preview" then
         print("***** PREVIEW *****")
         displayProducts=renderize(s,false)
